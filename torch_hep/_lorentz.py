@@ -1,41 +1,9 @@
 import torch
 
 from torch import Tensor
+from torch_scatter import scatter
 
 from pylorentz import Momentum4
-
-
-METRIC = torch.diag(torch.tensor([1,-1,-1,-1]))
-
-def apply_along_axis(function: callable, tensor: Tensor, dim: int=0) -> Tensor:
-    r"""This is equivalent to `numpy.apply_along_axis`, where the `tensor` is 
-    sliced along a given `axis` then apply function. This function only works with
-    CPU tensors and should not be used in code sections that require high performance.
-    
-    Args:
-        function (callable): This function should only accept only one variable.
-        tensor (torch.tensor): tensor to apply function.
-        axis (int): axis along which arr is sliced.
-
-    :rtype: :class:`torch.tensor`
-    """
-    return torch.stack([torch.tensor(function(x)) for x in torch.unbind(tensor, dim=dim)], dim=dim)
-
-
-def Dot1(tensor):
-    tensor1 = tensor[0:4]
-    tensor2 = tensor[4:8]
-    return (torch.mul(torch.mul(METRIC.to(tensor.device),tensor2),tensor1)).sum()
-
-
-def Trans1(tensor):
-    return torch.sqrt(tensor[1]**2+tensor[2]**2)
-
-def Phi1(tensor):
-    return torch.arctan2(tensor[2],tensor[1])
-
-def Theta1(tensor):
-    return torch.arctan2(Trans1(tensor),tensor[3])
 
 
 class LorentzTensor():
@@ -44,19 +12,22 @@ class LorentzTensor():
             if input.size() == torch.Size([4]):
                 self.values = input
                 self.device = input.get_device()
-                self.dim = 1
+                self.type = 'single'
             else:
                 raise TypeError("For 1 dimension tensor, expect size 4.")
         else:
             if input.size(dim=1) == 4:
                 self.values = input
                 self.device = input.get_device()
-                self.dim = -1
+                self.type = 'long'
             else:
                 raise TypeError("Expect size 4 in dimension 1.")
 
     def size(self, dim: int=0):
-        return self.values.size(dim)
+        if self.type == 'long':
+            return self.values.size(dim)
+        elif self.type == 'single':
+            return 1
 
     def __add__(self, other):
         return __class__(torch.add(self.values, other.values))
@@ -67,10 +38,11 @@ class LorentzTensor():
     def __mul__(self, other):
         if hasattr(other, "__len__") == False and hasattr(other, "size") == False:
             return torch.multiply(other,self.values)
-        elif self.dim == -1 and (other.values).size(dim=1) == 4:
-            return apply_along_axis(Dot1, torch.cat((self.values,other.values),dim=1), dim=0)
-        elif self.dim == 1 and (other.values).size() == torch.Size([4]):
-            return ((METRIC.to(self.device)*other.values)*self.values).sum()
+        elif (other.values).size() == (self.values).size():
+            indices = torch.arange(0,self.size(),1,device='cuda').expand(4,self.size()).transpose(0,1).reshape(1,4*self.size()).to(torch.long)
+            METRIC = torch.diag(torch.tensor([1,-1,-1,-1],device='cuda').repeat(1,self.size())[0])
+            scattered = torch.diagonal(METRIC*self.values.reshape(1,4*self.size())*other.values.reshape(1,4*self.size()),0)
+            return scatter(scattered,index=indices[0],reduce='sum')
         else:
             raise TypeError("Expect two Lorentz Tensor are same size.")
     
@@ -113,36 +85,44 @@ class LorentzTensor():
     
     @property
     def trans(self):
-        if self.dim == -1:
-            return apply_along_axis(Trans1,self.values,dim=0)
-        elif self.dim == 1:
-            return Trans1(self)
+        return torch.sqrt(self.values.select(1,1)**2+self.values.select(1,2)**2)
 
     @property
     def phi(self):
-        if self.dim == -1:
-            return apply_along_axis(Phi1,self.values,dim=0)
-        elif self.dim == 1:
-            return Phi1(self)
+        return torch.arctan2(self.values.select(1,2),self.values.select(1,1))
         
     @property
     def theta(self):
-        if self.dim == -1:
-            return apply_along_axis(Theta1,self.values,dim=0)
-        elif self.dim == 1:
-            return Theta1(self)
+        return torch.arctan2(self.trans,self.values.select(1,3))
 
 
 
-a = LorentzTensor(torch.tensor([[1,1,1,1],[2,2,2,2]],device='cuda'))
-b = LorentzTensor(torch.tensor([[3,3,3,3],[2,1,2,3]],device='cuda'))
+a = LorentzTensor(torch.tensor([[1,1,1,1],[2,2,2,2],[3,3,3,3]],device='cuda'))
+b = LorentzTensor(torch.tensor([[3,3,3,3],[2,1,2,3],[2,1,2,3]],device='cuda'))
 c = LorentzTensor(torch.tensor([3,3,3,3],device='cuda'))
 d = LorentzTensor(torch.tensor([2,1,2,3],device='cuda'))
 a_1_m = Momentum4(1,1,1,1)
 a_2_m = Momentum4(2,2,2,2)
 b_1_m = Momentum4(3,3,3,3)
 b_2_m = Momentum4(2,1,2,3)
+print(b.theta)
+print(b_2_m.theta)
 
-print((b*3))
-print(b_1_m*3)
-print(b_2_m*3)
+# print((b*3))
+# print(b_1_m*3)
+# print(b_2_m*3)
+# print(torch.range(0,1,1).expand(4,2).transpose(0,1).reshape(1,8))
+# print(torch.range(0,1,1).expand(4*8,2).transpose(0,1).reshape(8,8))
+# lenth = torch.arange(0,2,1,device='cuda').expand(4*8,2).transpose(0,1).reshape(8,8).to(torch.long)
+# lenth2 =torch.arange(0,2,1,device='cuda').expand(4,2).transpose(0,1).reshape(1,8).to(torch.long)
+# from torch_scatter import scatter, segment_coo, segment_csr
+# b=torch.tensor([[3,3,3,3],[2,1,2,3]],device='cuda').reshape(1,8)
+# a=torch.tensor([[1,1,1,1],[2,2,2,2]],device='cuda').reshape(1,8)
+# print(torch.tensor([1,-1,-1,-1],device='cuda').repeat(1,2)[0])
+# print(torch.diagonal(scatter(segment_coo(torch.diag(torch.tensor([1,-1,-1,-1],device='cuda').repeat(1,2)[0])*b*a,
+#               index=lenth2[0],
+#               reduce='sum'),
+#               index=lenth2[0],
+#               reduce='sum')),0)
+# diaa = torch.diagonal((torch.diag(torch.tensor([1,-1,-1,-1],device='cuda').repeat(1,2)[0])*b*a),0)
+# print(scatter(diaa,index=lenth2[0],reduce='sum'))
