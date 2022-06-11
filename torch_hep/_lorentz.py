@@ -7,10 +7,7 @@ from pylorentz import Momentum4
 
 
 class LorentzTensor(object):
-    r"""Convert a `torch.Tensor` with size `torch.Size([N,4])` into a
-    `LorentzTensor`. Each `dim=0` is a 4 vector, `torch.Tensor` allows
-    high performance Lorentz vector manipulation over entire vector space,
-    it also enables GPU computation.
+    r""":class:`LorentzTensor`
 
     Args:
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
