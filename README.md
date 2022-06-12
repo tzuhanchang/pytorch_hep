@@ -3,6 +3,13 @@
 PyTorch HEP is a project built upon PyTorch to act as a foundation for high performance computing for High Energy Physics. PyTorch HEP is currently under development, this includes tensor based Lorentz manipulation for particle reconstruction.
 <br />
 
+## Installation
+To install Pytorch HEP, run:
+```
+pip install torch-hep
+```
+<br />
+
 ## LorentzTensor
 ### Tensor to LorentzTensor
 Define a `LorentzTensor` with single 4-vector:
