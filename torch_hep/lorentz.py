@@ -3,8 +3,6 @@ import torch
 from torch import Tensor
 from torch_scatter import scatter
 
-from pylorentz import Momentum4
-
 
 class LorentzTensor(object):
     r""":class:`LorentzTensor`
