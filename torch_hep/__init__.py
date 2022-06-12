@@ -29,7 +29,7 @@ class LazyLoader(ModuleType):
 lorentz = LazyLoader('lorentz', globals(), 'torch_hep.lorentz')
 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 
 __all__ = [
