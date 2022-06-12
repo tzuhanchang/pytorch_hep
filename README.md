@@ -8,7 +8,6 @@ To install Pytorch HEP, run:
 ```
 pip install torch-hep
 ```
-<br />
 
 ## LorentzTensor
 ### Tensor to LorentzTensor
@@ -25,7 +24,6 @@ vector4Space = torch.tensor([[112849, 35192.7, -44507.4, 94562.1],[82849.2, 1214
 LorentzTensor(vector4Space)
 ```
 `LorentzTensor` computes properties of every 4-vectors in this vector space, it does not involve `numpy` so included tools fully support GPU computing.<br />
-<br />
 
 ### Lorentz vector Operations in LorentzTensor
 It supports all lorentz vector basic operations, including sum, subtract, dot product, multiply and divide:
@@ -43,7 +41,6 @@ LoretnzTensor1*LoretnzTensor2
 LoretnzTensor1/2
 > LorentzTensor(torch.tensor([[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5]]))
 ```
-<br />
 
 ## MomentumTensor
 To define a `MomentumTensor`: `MomentumTensor(torch.tensor([e,px,py,pz]))` or use method `MomentumTensor.EEtaPhiPt(torch.tensor([e,eta,phi,pt]))` or `MomentumTensor.MEtaPhiPt(torch.tensor([m,eta,phi,pt]))`. A `MomentumTensor` operates like a `LorentzTensor`, all methods apply in the same way.<br />
