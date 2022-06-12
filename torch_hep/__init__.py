@@ -4,7 +4,6 @@ from importlib import import_module
 import torch_hep.lorentz
 
 
-# https://github.com/tensorflow/tensorflow/blob/master/tensorflow/
 # python/util/lazy_loader.py
 class LazyLoader(ModuleType):
     def __init__(self, local_name, parent_module_globals, name):

@@ -12,7 +12,7 @@ install_requires = [
 setup(
     name='torch_hep',
     version=__version__,
-    description='Pytorch applications in high energy physics',
+    description='Pytorch for high energy physics',
     author='Zihan Zhang',
     author_email='zihan.zhang@cern.ch',
     url=URL,
