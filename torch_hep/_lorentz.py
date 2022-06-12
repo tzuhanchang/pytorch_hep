@@ -43,7 +43,7 @@ class LorentzTensor(object):
             indices = torch.arange(0,self.size,1,device=self.device,dtype=torch.int64).expand(4,self.size).transpose(0,1).reshape(1,4*self.size)
             METRIC = torch.diag(torch.tensor([1,-1,-1,-1],device=self.device).repeat(1,self.size)[0])
             scattered = torch.diagonal(METRIC*self.values.reshape(1,4*self.size)*other.values.reshape(1,4*self.size),0)
-            return scatter(scattered,index=indices[0],reduce='sum').reshape(self.size,1)
+            return scatter(scattered,index=indices[0],reduce='sum').reshape(-1,1)
         else:
             raise TypeError("Expect two Lorentz Tensor are same size.")
     
@@ -67,7 +67,7 @@ class LorentzTensor(object):
             return self.__truediv__(other)
 
     def __getitem__(self, i):
-        return self.values[i]
+        return self.values.select(-1,i).reshape((-1,1))
 
     def dot(self, other):
         if (other.values).size() == torch.Size([4]):
@@ -89,42 +89,75 @@ class LorentzTensor(object):
     
     @property
     def trans(self):
-        return torch.sqrt(self.values.select(1,1)**2+self.values.select(1,2)**2).reshape(self.size,1)
+        return torch.sqrt(self[1]**2+self[2]**2).reshape(-1,1)
 
     @property
     def phi(self):
-        return torch.atan2(self.values.select(1,2),self.values.select(1,1)).reshape(self.size,1)
+        return torch.atan2(self[2],self[1]).reshape(-1,1)
         
     @property
     def theta(self):
-        return torch.atan2(self.trans,self.values.select(1,3)).reshape(self.size,1)
+        return torch.atan2(self.trans,self[3]).reshape(-1,1)
 
     @property
     def eta(self):
-        return -torch.log(torch.tan(self.theta/ 2)).reshape(self.size,1)
+        return -torch.log(torch.tan(self.theta/ 2)).reshape(-1,1)
 
 
-# class MomentumTensor(LorentzTensor):
-#     @staticmethod
-#     def EEtaPhiPt(e_eta_phi_pt: Tensor):
-#         px = torch.cos(e_eta_phi_pt.select(-1,2)) * 
-#         return MomentumTensor(torch.cat(()))
+class MomentumTensor(LorentzTensor):
+    r""":class:`MomentumTensor`
 
+    Args:
+        input (torch.tensor): input tensor with size `torch.Size([N,4])`.
+    """
+    @staticmethod
+    def EEtaPhiPt(input: Tensor):
+        Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+        Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+        Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+        return MomentumTensor(torch.cat((input.select(-1,0).reshape([-1,1]),Px,Py,Pz),dim=1))
+    
+    @staticmethod
+    def MEtaPhiPt(input: Tensor):
+        Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+        Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+        Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+        E  = torch.sqrt((input.select(-1,0).reshape([-1,1]))**2+Px**2+Py**2+Pz**2)
+        return MomentumTensor(torch.cat((E,Px,Py,Pz),dim=1))
+    
+    @property
+    def e(self):
+        return self[0]
 
-"""
-TEST
-"""
-b1 = Momentum4(111549, 35202.7, -46507.4, 94552.1)
-b2 = Momentum4(86549.2, 12443.8, 81453.1, 25407.5)
-lep_pos = Momentum4(96806.2, 29784.7, -14348.2, 90985.8)
-lep_neg = Momentum4(27209.1, 26173.4, 3376.81, 6623.67)
-met_met = 39915.24609375
-met_phi = -1.7860441207885742
+    @property
+    def px(self):
+        return self[1]
 
-print(lep_pos.mag2, lep_neg.mag2)
+    @property
+    def py(self):
+        return self[2]
+    
+    @property
+    def pz(self):
+        return self[3]
+    
+    @property
+    def p2(self):
+        return self.px**2 + self.py**2 + self.pz**2
 
-b = LorentzTensor(torch.tensor([[111549, 35202.7, -46507.4, 94552.1],[86549.2, 12443.8, 81453.1, 25407.5]],device='cpu',dtype=torch.float64))
-lep = LorentzTensor(torch.tensor([[96806.2, 29784.7, -14348.2, 90985.8],[27209.1, 26173.4, 3376.81, 6623.67]],device='cpu',dtype=torch.float64))
+    @property
+    def p(self):
+        return torch.sqrt(self.p2)
+    
+    @property
+    def pt(self):
+        return self.trans
 
-print((lep).mag2)
+    @property
+    def m2(self):
+        return self.mag2
+    
+    @property
+    def m(self):
+        return self.mag
 
