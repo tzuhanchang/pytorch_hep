@@ -10,18 +10,17 @@ class LorentzTensor(object):
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
     """
     def __init__(self, input: Tensor):
+        self.values = input
+        self.device = input.device
+        self._minkowski = torch.tensor([1,-1,-1,-1],device=self.device)
         if input.ndim == 1:
             if input.size() == torch.Size([4]):
-                self.values = input
-                self.device = input.device
                 self.type = 'single'
                 self.size = 1
             else:
                 raise TypeError("For 1 dimension tensor, expect size 4.")
         else:
             if input.size(dim=1) == 4:
-                self.values = input
-                self.device = input.device
                 self.type = 'long'
                 self.size = self.values.size(dim=0)
             else:
@@ -34,36 +33,34 @@ class LorentzTensor(object):
         return self.__class__(torch.sub(self.values, other.values))
 
     def __mul__(self, other):
-        if hasattr(other, "__len__") == False and hasattr(other, "size") == False:
-            return __class__(torch.multiply(other,self.values))
-        else:
-            raise TypeError("'__mul__' only possible with a scalar")
+        return self.__class__(torch.multiply(other,self.values))
     
     def __rmul__(self, other):
         return self * other
     
     def __truediv__(self, other):
-        if hasattr(other, "__len__") == False and hasattr(other, "size") == False:
-            return __class__(torch.div(self.values,other,rounding_mode='floor'))
-        else:
-            raise TypeError("'__div__' only possible with a scalar")
+        return self.__class__(torch.div(self.values,other,rounding_mode='floor'))
     
     def __floordiv__(self, other):
-        if hasattr(other, "__len__") == False and hasattr(other, "size") == False:
-            return __class__(torch.div(self.values,other,rounding_mode='floor'))
-        else:
-            raise TypeError("'__floordiv__' only possible with a scalar")
+        return self.__class__(torch.div(self.values,other,rounding_mode='floor'))
     
     def __div__(self, other):
-        if hasattr(other, "__len__") == False and hasattr(other, "size") == False:
-            return self.__truediv__(other)
+        return self.__truediv__(other)
 
-    def __getitem__(self, i):
-        return self.values.select(-1,i).reshape((-1,1))
+    def __getitem__(self, index):
+        return self.select(0, index)
+
+    def select(self, dim, index):
+        if dim == 0:
+            return self.values.select(0,index)
+        else:
+            return self.values.select(dim,index).reshape((-1,1))
 
     def dot(self, other):
         if (other.values).size() == (self.values).size():
-            return torch.diagonal(torch.tensordot(self.values,torch.mul(torch.tensor([1,-1,-1,-1],device=self.device),other.values),dims=([1],[1]))).reshape(-1,1)
+            return torch.diagonal(torch.tensordot(self.values,self._minkowski*other.values,dims=([1],[1]))).reshape(-1,1)
+        else:
+            raise ValueError("two 'LorentzTensor' must have same size in dim=0")
 
     def to_tensor(self):
         return self.values
@@ -73,7 +70,7 @@ class LorentzTensor(object):
 
     @property
     def mag2(self):
-        return self * self
+        return self.dot(self)
 
     @property
     def mag(self):
@@ -81,15 +78,15 @@ class LorentzTensor(object):
     
     @property
     def trans(self):
-        return torch.sqrt(self[1]**2+self[2]**2).reshape(-1,1)
+        return torch.sqrt(self.select(-1,1)**2+self.select(-1,2)**2).reshape(-1,1)
 
     @property
     def phi(self):
-        return torch.atan2(self[2],self[1]).reshape(-1,1)
+        return torch.atan2(self.select(-1,2),self.select(-1,1)).reshape(-1,1)
         
     @property
     def theta(self):
-        return torch.atan2(self.trans,self[3]).reshape(-1,1)
+        return torch.atan2(self.trans,self.select(-1,3)).reshape(-1,1)
 
     @property
     def eta(self):
@@ -119,19 +116,19 @@ class MomentumTensor(LorentzTensor):
     
     @property
     def e(self):
-        return self[0]
+        return self.select(-1,0)
 
     @property
     def px(self):
-        return self[1]
+        return self.select(-1,1)
 
     @property
     def py(self):
-        return self[2]
+        return self.select(-1,2)
     
     @property
     def pz(self):
-        return self[3]
+        return self.select(-1,3)
     
     @property
     def p2(self):
