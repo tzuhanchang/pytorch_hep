@@ -1,6 +1,6 @@
 # PyTorch HEP
 <br />
-PyTorch HEP is a project built upon PyTorch to act as a foundation for high performance computing for High Energy Physics. PyTorch HEP is currently under development, this includes tensor based Lorentz manipulation for particle reconstruction.
+PyTorch HEP is a project built upon PyTorch to act as a foundation for high performance computing for High Energy Physics. PyTorch HEP currently includes tensor based Lorentz manipulation for particle reconstruction and graph builder for Graph Neural Network (GNN).
 <br />
 
 ## Installation
@@ -65,21 +65,19 @@ LorentzTensor(vector4Space)
 ### Lorentz vector Operations in LorentzTensor
 It supports all lorentz vector basic operations, including sum, subtract, dot product, multiply and divide:
 ```ruby
-LoretnzTensor1 = LorentzTensor(torch.tensor([[1,1,1,1],[1,1,1,1],[1,1,1,1]]))
-LoretnzTensor2 = LorentzTensor(torch.tensor([[2,2,2,2],[2,2,2,2],[2,2,2,2]]))
-
-LoretnzTensor1+LoretnzTensor2
-LoretnzTensor1-LoretnzTensor2
-LoretnzTensor1*LoretnzTensor2
-5*LoretnzTensor1
-LoretnzTensor1/2
+a = LorentzTensor(torch.tensor([[1,1,1,1],[1,1,1,1],[1,1,1,1]]))
+b = LorentzTensor(torch.tensor([[2,2,2,2],[2,2,2,2],[2,2,2,2]]))
 ```
-outputs:
 ```
+>>> a+b
 LorentzTensor(torch.tensor([[3,3,3,3],[3,3,3,3],[3,3,3,3]]))
+>>> a-b
 LorentzTensor(torch.tensor([[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1]]))
+>>> a.dot(b)
 torch.tensor([[-4],[-4],[-4]])
+>>> 5*a
 LorentzTensor(torch.tensor([[5,5,5,5],[5,5,5,5],[5,5,5,5]]))
+>>> a/2
 LorentzTensor(torch.tensor([[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5]]))
 ```
 
@@ -91,15 +89,14 @@ MomentumTensor.EEtaPhiPt(torch.tensor([e,eta,phi,pt]))
 MomentumTensor.MEtaPhiPt(torch.tensor([m,eta,phi,pt]))
 ```
 same operations apply like a `LorentzTensor` does.<br />
-`MomentumTensor` also includes calculations of common 4-momentum properties:
+`MomentumTensor` also includes calculations of common 4-momenta properties:
 ```ruby
 momentum = MomentumTensor(torch.tensor([[111549, 35202.7, -46507.4, 94552.1],[86549.2, 12443.8, 81453.1, 25407.5],[86799.1, 12423.2, 81499.2, 25411.3]]))
-
-momentum.pt
-momentum.m
 ```
-outputs:
+get transverse momenta 'pT' and mass 'm' from MomentumTensor:
 ```
+>>> momentum.pt
 torch.tensor([[58328.10936461082],[82398.15324417168],[82440.61801612115]])
+>>> momentum.m
 torch.tensor([[10045.468856155943],[7467.751089852902],[9586.140737544087]])
 ```
