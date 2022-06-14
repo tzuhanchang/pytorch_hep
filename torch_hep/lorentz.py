@@ -49,6 +49,9 @@ class LorentzTensor(object):
 
     def __getitem__(self, index):
         return self.select(0, index)
+    
+    def __len__(self):
+        return self.size
 
     def select(self, dim, index):
         if dim == 0:
