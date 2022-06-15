@@ -36,15 +36,13 @@ G.add_asGlobal(key='u', nJet=3, nBtagged=2)
 ```
 
 `GraphBuilder` stores numerical informations in tensor in provided device (cpu or gpu), to get values:
-```ruby
-G['x']
-G['x_features']
 ```
-outputs:
-```
+>>> G['x']
 torch.tensor([[125000.6,3.4],[290000.4,-2.5],[223422.8,1.3]])
+>>> G['x_features']
 ['jet_pt','jet_eta']
 ```
+
 
 ## LorentzTensor
 ### Tensor to LorentzTensor
@@ -65,20 +63,20 @@ LorentzTensor(vector4Space)
 ### Lorentz vector Operations in LorentzTensor
 It supports all lorentz vector basic operations, including sum, subtract, dot product, multiply and divide:
 ```ruby
-a = LorentzTensor(torch.tensor([[1,1,1,1],[1,1,1,1],[1,1,1,1]]))
-b = LorentzTensor(torch.tensor([[2,2,2,2],[2,2,2,2],[2,2,2,2]]))
+a = LorentzTensor([[1,1,1,1],[1,1,1,1],[1,1,1,1]])
+b = LorentzTensor([[2,2,2,2],[2,2,2,2],[2,2,2,2]])
 ```
 ```
->>> a+b
-LorentzTensor(torch.tensor([[3,3,3,3],[3,3,3,3],[3,3,3,3]]))
->>> a-b
-LorentzTensor(torch.tensor([[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1]]))
+>>> (a+b).values
+torch.tensor([[3,3,3,3],[3,3,3,3],[3,3,3,3]])
+>>> (a-b).values
+torch.tensor([[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1]])
 >>> a.dot(b)
 torch.tensor([[-4],[-4],[-4]])
->>> 5*a
-LorentzTensor(torch.tensor([[5,5,5,5],[5,5,5,5],[5,5,5,5]]))
->>> a/2
-LorentzTensor(torch.tensor([[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5]]))
+>>> (5*a).values
+torch.tensor([[5,5,5,5],[5,5,5,5],[5,5,5,5]])
+>>> (a/2).values
+torch.tensor([[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5],[0.5,0.5,0.5,0.5]])
 ```
 
 ## MomentumTensor

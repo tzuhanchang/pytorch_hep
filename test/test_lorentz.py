@@ -4,10 +4,10 @@ from torch_hep.lorentz import LorentzTensor, MomentumTensor
 
 
 def test_LorentzTensor():
-    short = LorentzTensor(torch.tensor([111549, 35202.7, -46507.4, 94552.1]))
-    long  = LorentzTensor(torch.tensor([[111549, 35202.7, -46507.4, 94552.1],
+    short = LorentzTensor([111549, 35202.7, -46507.4, 94552.1])
+    long  = LorentzTensor([[111549, 35202.7, -46507.4, 94552.1],
                                         [86549.2, 12443.8, 81453.1, 25407.5],
-                                        [86799.1, 12423.2, 81499.2, 25411.3]]))
+                                        [86799.1, 12423.2, 81499.2, 25411.3]])
     
     assert torch.all(torch.eq((short*2).values,(short+short).values))
     assert torch.all(torch.eq((long*2).values,(long+long).values))
@@ -16,18 +16,18 @@ def test_LorentzTensor():
 
 
 def test_MomentumTensor():
-    short = MomentumTensor(torch.tensor([111549, 35202.7, -46507.4, 94552.1]))
-    long  = MomentumTensor(torch.tensor([[111549, 35202.7, -46507.4, 94552.1],
-                                        [86549.2, 12443.8, 81453.1, 25407.5],
-                                        [86799.1, 12423.2, 81499.2, 25411.3]]))
-    short_EEtaPhiPt = MomentumTensor.EEtaPhiPt(torch.tensor([111549.0, 1.2600811625519022, -0.9228767507929038, 58328.10936461082]))
-    long_EEtaPhiPt  = MomentumTensor.EEtaPhiPt(torch.tensor([[111549.0, 1.2600811625519022, -0.9228767507929038, 58328.10936461082],
-                                                            [86549.2, 0.3036619846021553, 1.4191959214152075, 82398.15324417168],
-                                                            [86799.1, 0.30355425211172465, 1.4195273814629104, 82440.61801612115]]))
-    short_MEtaPhiPt = MomentumTensor.MEtaPhiPt(torch.tensor([10045.468856155943, 1.2600811625519022, -0.9228767507929038, 58328.10936461082]))
-    long_MEtaPhiPt  = MomentumTensor.MEtaPhiPt(torch.tensor([[10045.468856155943, 1.2600811625519022, -0.9228767507929038, 58328.10936461082],
-                                                            [7467.751089852902, 0.3036619846021553, 1.4191959214152075, 82398.15324417168],
-                                                            [9586.140737544087, 0.30355425211172465, 1.4195273814629104, 82440.61801612115]]))
+    short = MomentumTensor([111549, 35202.7, -46507.4, 94552.1])
+    long  = MomentumTensor([[111549, 35202.7, -46507.4, 94552.1],
+                            [86549.2, 12443.8, 81453.1, 25407.5],
+                            [86799.1, 12423.2, 81499.2, 25411.3]])
+    short_EEtaPhiPt = MomentumTensor.EEtaPhiPt([111549.0, 1.2600811625519022, -0.9228767507929038, 58328.10936461082])
+    long_EEtaPhiPt  = MomentumTensor.EEtaPhiPt([[111549.0, 1.2600811625519022, -0.9228767507929038, 58328.10936461082],
+                                                [86549.2, 0.3036619846021553, 1.4191959214152075, 82398.15324417168],
+                                                [86799.1, 0.30355425211172465, 1.4195273814629104, 82440.61801612115]])
+    short_MEtaPhiPt = MomentumTensor.MEtaPhiPt([10045.468856155943, 1.2600811625519022, -0.9228767507929038, 58328.10936461082])
+    long_MEtaPhiPt  = MomentumTensor.MEtaPhiPt([[10045.468856155943, 1.2600811625519022, -0.9228767507929038, 58328.10936461082],
+                                                [7467.751089852902, 0.3036619846021553, 1.4191959214152075, 82398.15324417168],
+                                                [9586.140737544087, 0.30355425211172465, 1.4195273814629104, 82440.61801612115]])
 
     assert torch.all(torch.isclose(short[0],short_EEtaPhiPt.e))
     assert torch.all(torch.isclose(long[0],long_EEtaPhiPt.e))

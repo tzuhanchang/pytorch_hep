@@ -8,19 +8,23 @@ class LorentzTensor(object):
 
     Args:
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
+        device (str): device is used to store tensors (default 'cpu').
     """
-    def __init__(self, input: Tensor):
-        self.values = input
-        self.device = input.device
+    def __init__(self, input, device='cpu'):
+        if torch.is_tensor(input) == True:
+            self.values = input.clone().detach().to(device=device)
+        else:
+            self.values = torch.tensor(input,device=device)
+        self.device = device
         self._minkowski = torch.tensor([1,-1,-1,-1],device=self.device)
-        if input.ndim == 1:
-            if input.size() == torch.Size([4]):
+        if self.values.ndim == 1:
+            if self.values.size() == torch.Size([4]):
                 self.type = 'single'
                 self.size = 1
             else:
                 raise TypeError("For 1 dimension tensor, expect size 4.")
         else:
-            if input.size(dim=1) == 4:
+            if self.values.size(dim=1) == 4:
                 self.type = 'long'
                 self.size = self.values.size(dim=0)
             else:
