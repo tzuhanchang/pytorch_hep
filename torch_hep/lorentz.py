@@ -65,7 +65,7 @@ class LorentzTensor(object):
 
     def dot(self, other):
         if (other.values).size() == (self.values).size():
-            return torch.diagonal(torch.tensordot(self.values,self._minkowski*other.values,dims=([1],[1]))).reshape(-1,1)
+            return torch.sum(self.values * self._minkowski * other.values, dim=1)
         else:
             raise ValueError("two 'LorentzTensor' must have same size in dim=0")
 
