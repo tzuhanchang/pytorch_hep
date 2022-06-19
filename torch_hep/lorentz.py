@@ -10,12 +10,12 @@ class LorentzTensor(object):
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
         device (str): device is used to store tensors (default 'cpu').
     """
-    def __init__(self, input, device='cpu'):
+    def __init__(self, input, **kwargs):
         if torch.is_tensor(input) == True:
-            self.values = input.clone().detach().to(device=device)
+            self.values = input.clone()
         else:
-            self.values = torch.tensor(input,device=device)
-        self.device = device
+            self.values = torch.tensor(input,**kwargs)
+        self.device = self.values.device
         self._minkowski = torch.tensor([1,-1,-1,-1],device=self.device)
         if self.values.ndim == 1:
             if self.values.size() == torch.Size([4]):
