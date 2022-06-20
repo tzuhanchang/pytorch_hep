@@ -29,7 +29,7 @@ class LazyLoader(ModuleType):
 lorentz = LazyLoader('lorentz', globals(), 'torch_hep.lorentz')
 graph = LazyLoader('graph', globals(), 'torch_hep.graph')
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 
 __all__ = [
