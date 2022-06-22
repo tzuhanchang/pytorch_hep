@@ -2,6 +2,8 @@ from types import ModuleType
 from importlib import import_module
 
 import torch_hep.lorentz
+import torch_hep.graph
+import torch_hep.data
 
 
 # python/util/lazy_loader.py
@@ -28,6 +30,7 @@ class LazyLoader(ModuleType):
 
 lorentz = LazyLoader('lorentz', globals(), 'torch_hep.lorentz')
 graph = LazyLoader('graph', globals(), 'torch_hep.graph')
+data = LazyLoader('data', globals(), 'torch_hep.data')
 
 __version__ = '0.0.3'
 
