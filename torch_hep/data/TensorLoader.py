@@ -48,7 +48,7 @@ class TensorLoader():
     def __next__(self):
         if self._itercount < self._num_batches:
             self._itercount += 1
-            return self.batchs[self._itercount-1]
+            return self.batches[self._itercount-1]
         else:
             raise StopIteration
             
