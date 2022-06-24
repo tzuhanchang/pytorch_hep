@@ -58,6 +58,9 @@ class LorentzTensor(object):
         return self.size
 
     def select(self, dim, index):
+        if self.type == 'single':
+            dim = 0
+        
         if dim == 0:
             return self.values.select(0,index)
         else:
@@ -65,7 +68,10 @@ class LorentzTensor(object):
 
     def dot(self, other):
         if (other.values).size() == (self.values).size():
-            return torch.sum(self.values * self._minkowski * other.values, dim=1).reshape(-1,1)
+            if self.type == 'long':
+                return torch.sum(self.values * self._minkowski * other.values, dim=1).reshape(-1,1)
+            else:
+                return torch.sum(self.values * self._minkowski * other.values, dim=0)
         else:
             raise ValueError("two 'LorentzTensor' must have same size in dim=0")
 
@@ -85,19 +91,31 @@ class LorentzTensor(object):
     
     @property
     def trans(self):
-        return torch.sqrt(self.select(-1,1)**2+self.select(-1,2)**2).reshape(-1,1)
+        if self.type == 'long':
+            return torch.sqrt(self.select(-1,1)**2+self.select(-1,2)**2).reshape(-1,1)
+        else:
+            return torch.sqrt(self.select(-1,1)**2+self.select(-1,2)**2)
 
     @property
     def phi(self):
-        return torch.atan2(self.select(-1,2),self.select(-1,1)).reshape(-1,1)
+        if self.type == 'long':
+            return torch.atan2(self.select(-1,2),self.select(-1,1)).reshape(-1,1)
+        else:
+            return torch.atan2(self.select(-1,2),self.select(-1,1))
         
     @property
     def theta(self):
-        return torch.atan2(self.trans,self.select(-1,3)).reshape(-1,1)
+        if self.type == 'long':
+            return torch.atan2(self.trans,self.select(-1,3)).reshape(-1,1)
+        else:
+            return torch.atan2(self.trans,self.select(-1,3))
 
     @property
     def eta(self):
-        return -torch.log(torch.tan(self.theta/ 2)).reshape(-1,1)
+        if self.type == 'long':
+            return -torch.log(torch.tan(self.theta/ 2)).reshape(-1,1)
+        else:
+            return -torch.log(torch.tan(self.theta/ 2))
 
 
 class MomentumTensor(LorentzTensor):
@@ -107,19 +125,44 @@ class MomentumTensor(LorentzTensor):
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
     """
     @staticmethod
-    def EEtaPhiPt(input: Tensor):
-        Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-        Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-        Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
-        return MomentumTensor(torch.cat((input.select(-1,0).reshape([-1,1]),Px,Py,Pz),dim=1))
+    def EEtaPhiPt(input, **kwargs):
+        if torch.is_tensor(input) != True:
+            input = torch.tensor(input,**kwargs)
+        if input.ndim == 1:
+            if input.size() != torch.Size([4]):
+                raise TypeError("For 1 dimension tensor, expect size 4.")
+            Px = (torch.cos(input[2])*input[3])
+            Py = (torch.sin(input[2])*input[3])
+            Pz = torch.div(input[3],torch.tan(2*torch.arctan(torch.exp(-input[1]))))
+            return MomentumTensor(torch.cat((input[0].unsqueeze(0),Px.unsqueeze(0),Py.unsqueeze(0),Pz.unsqueeze(0))))
+        else:
+            if input.size(dim=1) != 4:
+                raise TypeError("Expect size 4 in dimension 1.")
+            Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+            Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+            Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+            return MomentumTensor(torch.cat((input.select(-1,0).reshape([-1,1]),Px,Py,Pz),dim=1))
     
     @staticmethod
-    def MEtaPhiPt(input: Tensor):
-        Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-        Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-        Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
-        E  = torch.sqrt((input.select(-1,0).reshape([-1,1]))**2+Px**2+Py**2+Pz**2)
-        return MomentumTensor(torch.cat((E,Px,Py,Pz),dim=1))
+    def MEtaPhiPt(input, **kwargs):
+        if torch.is_tensor(input) != True:
+            input = torch.tensor(input,**kwargs)
+        if input.ndim == 1:
+            if input.size() != torch.Size([4]):
+                raise TypeError("For 1 dimension tensor, expect size 4.")
+            Px = (torch.cos(input[2])*input[3])
+            Py = (torch.sin(input[2])*input[3])
+            Pz = torch.div(input[3],torch.tan(2*torch.arctan(torch.exp(-input[1]))))
+            E  = torch.sqrt(input[0]**2+Px**2+Py**2+Pz**2)
+            return MomentumTensor(torch.cat((E.unsqueeze(0),Px.unsqueeze(0),Py.unsqueeze(0),Pz.unsqueeze(0))))
+        else:
+            if input.size(dim=1) != 4:
+                raise TypeError("Expect size 4 in dimension 1.")
+            Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+            Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
+            Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+            E  = torch.sqrt((input.select(-1,0).reshape([-1,1]))**2+Px**2+Py**2+Pz**2)
+            return MomentumTensor(torch.cat((E,Px,Py,Pz),dim=1))
     
     @property
     def e(self):
