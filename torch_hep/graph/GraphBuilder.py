@@ -1,6 +1,7 @@
 import torch
 
 from torch import Tensor
+from torch_geometric.data import Data
 
 
 class GraphBuilder():
@@ -20,19 +21,19 @@ class GraphBuilder():
 
     def add_asGlobal(self, key: str, **attr):
         if key not in self._graph:
-            self._graph.update({key: torch.tensor([*attr.values()],device=self.device)})
-            self._graph.update({key+'_features': [*attr.keys()]})
+            self._graph.update({key: torch.tensor([[x for x in attr.values()]],device=self.device)})
+            self._graph.update({key+'_features': [x for x in attr.keys()]})
         elif key in self._graph:
-            self[key] = torch.cat((self[key],torch.tensor([*attr.values()],device=self.device)),dim=0)
-            self[key+'_features'] += [*attr.keys()]
+            self[key] = torch.cat((self[key],torch.tensor([[x for x in attr.values()]],device=self.device)),dim=1)
+            self[key+'_features'] += [x for x in attr.keys()]
 
     def add_asNode(self, key: str, **attr):
         if key not in self._graph:
-            self._graph.update({key: torch.tensor([*attr.values()],device=self.device).transpose(1,0)})
-            self._graph.update({key+'_features': [*attr.keys()]})
+            self._graph.update({key: torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)})
+            self._graph.update({key+'_features': [x for x in attr.keys()]})
         elif key in self._graph:
-            self[key] = torch.cat((self[key],torch.tensor([*attr.values()],device=self.device).transpose(1,0)),dim=1)
-            self[key+'_features'] += [*attr.keys()]
+            self[key] = torch.cat((self[key],torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)),dim=1)
+            self[key+'_features'] += [x for x in attr.keys()]
 
     def add_asEdge(self, key: str, **attr):
         if 'edge_index' not in self._graph:
@@ -42,9 +43,11 @@ class GraphBuilder():
                 self._graph.update({'edge_index': torch.tensor(attr.get('index'),device=self.device).transpose(0,1)})
                 del attr['index']
         if key not in self._graph:
-            self._graph.update({key: torch.tensor([*attr.values()],device=self.device).transpose(1,0)})
-            self._graph.update({key+'_features': [*attr.keys()]})
+            self._graph.update({key: torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)})
+            self._graph.update({key+'_features': [x for x in attr.keys()]})
         elif key in self._graph:
-            self[key] = torch.cat((self[key],torch.tensor([*attr.values()],device=self.device).transpose(1,0)),dim=1)
-            self[key+'_features'] += [*attr.keys()]
+            self[key] = torch.cat((self[key],torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)),dim=1)
+            self[key+'_features'] += [x for x in attr.keys()]
 
+    def to_Data(self):
+        return Data(**self._graph)
