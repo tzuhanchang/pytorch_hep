@@ -26,6 +26,7 @@ class GraphBuilder():
         elif key in self._graph:
             self[key] = torch.cat((self[key],torch.tensor([[x for x in attr.values()]],device=self.device)),dim=1)
             self[key+'_features'] += [x for x in attr.keys()]
+        setattr(self,key,self[key])
 
     def add_asNode(self, key: str, **attr):
         if key not in self._graph:
@@ -34,6 +35,7 @@ class GraphBuilder():
         elif key in self._graph:
             self[key] = torch.cat((self[key],torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)),dim=1)
             self[key+'_features'] += [x for x in attr.keys()]
+        setattr(self,key,self[key])
 
     def add_asEdge(self, key: str, **attr):
         if 'edge_index' not in self._graph:
@@ -48,6 +50,7 @@ class GraphBuilder():
         elif key in self._graph:
             self[key] = torch.cat((self[key],torch.tensor([list(x) for x in attr.values()],device=self.device).transpose(1,0)),dim=1)
             self[key+'_features'] += [x for x in attr.keys()]
+        setattr(self,key,self[key])
 
     def to_Data(self):
         return Data(**self._graph)
