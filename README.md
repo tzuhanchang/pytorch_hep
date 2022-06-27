@@ -34,15 +34,16 @@ Similarly, to add global-like object:
 ```ruby
 G.add_asGlobal(key='u', nJet=3, nBtagged=2)
 ```
-
-`GraphBuilder` stores numerical informations in tensor in provided device (cpu or gpu), to get values:
+<br />
+`GraphBuilder` stores input informations as tensors on provided device (cpu or gpu), to get values:
 ```
->>> G['x']
+>>> G.x  # or G['x']
 torch.tensor([[125000.6,3.4],[290000.4,-2.5],[223422.8,1.3]])
->>> G['x_features']
+>>> G.x_features
 ['jet_pt','jet_eta']
 ```
-
+Users can choose to covert informations stored in `GraphBuilder` to `torch_geometric.data.Data` using `G.to_Data()`, which allows users to use it as inputs of custom dataset.
+<br />
 
 ## LorentzTensor
 ### Tensor to LorentzTensor
