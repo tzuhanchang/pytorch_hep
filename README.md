@@ -1,4 +1,7 @@
 # PyTorch HEP
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/275f6ff01ca4463ba478b4223be49a79)](https://app.codacy.com/gh/tzuhanchang/pytorch_hep?utm_source=github.com&utm_medium=referral&utm_content=tzuhanchang/pytorch_hep&utm_campaign=Badge_Grade)
+
 <br />
 PyTorch HEP is a project built upon PyTorch to act as a foundation for high performance computing for High Energy Physics. PyTorch HEP currently includes tensor based Lorentz manipulation for particle reconstruction and graph builder for Graph Neural Network (GNN).
 <br />
