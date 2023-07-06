@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 URL = 'https://github.com/tzuhanchang/pytorch_hep'
 
 install_requires = [
@@ -22,11 +22,6 @@ setup(
     ],
     python_requires='>=3.7',
     install_requires=install_requires,
-    # extras_require={
-    #     'benchmark': benchmark_requires,
-    #     'test': test_requires,
-    #     'dev': dev_requires,
-    # },
     packages=find_packages(),
     include_package_data=True,
 )
