@@ -2,15 +2,18 @@ import torch
 
 from torch import Tensor
 
-
 class LorentzTensor(object):
-    r""":class:`LorentzTensor`
+    r"""A scalable approch for facilitating computations with lorentz vectors with Tensors.
+
+    .. code-block:: python
+        from torch_hep.lorentz import LorentzTensor
+
+        t4 = LorentzTensor([[1,1,1,1],[1,1,1,1],[1,1,1,1]])
 
     Args:
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
-        device (str): device is used to store tensors (default 'cpu').
     """
-    def __init__(self, input, **kwargs):
+    def __init__(self, input: Tensor, **kwargs):
         if torch.is_tensor(input) == True:
             self.values = input.clone()
         else:
@@ -119,13 +122,20 @@ class LorentzTensor(object):
 
 
 class MomentumTensor(LorentzTensor):
-    r""":class:`MomentumTensor`
+    r""":A scalable approch for facilitating computations with 4-vectors in high energy physics
+    with Tensors.
+
+    .. code-block:: python
+        from torch_hep.lorentz import MomentumTensor
+
+        momentum = MomentumTensor(torch.tensor([[111549, 35202.7, -46507.4, 94552.1],[86549.2, 12443.8, 81453.1, 25407.5],[86799.1, 12423.2, 81499.2, 25411.3]]))
+        momentum.pt
 
     Args:
         input (torch.tensor): input tensor with size `torch.Size([N,4])`.
     """
     @staticmethod
-    def EEtaPhiPt(input, **kwargs):
+    def EEtaPhiPt(input: Tensor, **kwargs):
         if torch.is_tensor(input) != True:
             input = torch.tensor(input,**kwargs)
         if input.ndim == 1:
@@ -144,7 +154,7 @@ class MomentumTensor(LorentzTensor):
             return MomentumTensor(torch.cat((input.select(-1,0).reshape([-1,1]),Px,Py,Pz),dim=1))
     
     @staticmethod
-    def MEtaPhiPt(input, **kwargs):
+    def MEtaPhiPt(input: Tensor, **kwargs):
         if torch.is_tensor(input) != True:
             input = torch.tensor(input,**kwargs)
         if input.ndim == 1:
