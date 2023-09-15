@@ -65,13 +65,13 @@ class GraphDataset(Dataset):
             start=int(i*len_int/self.n_split)
 
             # saving df
-            if isinstance(self.df, type(None)) == False and graphs_only == False:
+            if isinstance(self.df, type(None)) is False and graphs_only is False:
                 self.df.iloc[start:end].to_json('{}/df_batch-{}.json'.format(path, i),orient="index")
 
             # saving graphs
             with open('{}/graphs_batch-{}.pkl'.format(path, i), 'wb') as f:
                 pickle.dump(self.graphs[start:end], f)
-        
+
         if compression is True:
             where = os.path.split(path)
             tar = Popen(['tar', '-czvf', str(where[0])+'/'+str(where[1])+'.tar.gz', str(path)])
@@ -81,28 +81,28 @@ class GraphDataset(Dataset):
         list_of_files = [file for file in os.listdir(path) if os.path.isfile(os.path.join(path, file)) and file.find('df')==-1]
         self.n_split = max([int(file.split('-')[1].replace(".pkl", "")) for file in list_of_files])+1
 
-        if 'df' in ''.join(os.listdir(path)) == True and graphs_only == False:
+        if 'df' in ''.join(os.listdir(path)) is True and graphs_only is False:
             self.df=DataFrame()
 
         # downloading dataset
         self.graphs = []
         for i in tqdm(range(self.n_split), desc='Downloading the dataset', unit=' batch'):
-            if graphs_only == False:
+            if graphs_only is False:
                 try:
                     self.df = concat([self.df, read_json('{}/df_batch-{}.json'.format(path, i),orient="index")], axis=0)
-                except:
+                except FileNotFoundError:
                     warnings.warn("`df` files cannot be found, download graph only.", UserWarning)
 
             with open('{}/graphs_batch-{}.pkl'.format(path, i), 'rb') as f:
                 self.graphs = self.graphs + pickle.load(f)
 
     def concat(self, obj: Dataset):
-        if isinstance(self.df, type(None)) == False and isinstance(obj.df, type(None)) == False:
+        if isinstance(self.df, type(None)) is False and isinstance(obj.df, type(None)) is False:
             self.df = concat([self.df, obj.df],axis=0).reset_index(drop=True)
-        elif isinstance(self.df, type(None)) == True and isinstance(obj.df, type(None)) == False:
+        elif isinstance(self.df, type(None)) is True and isinstance(obj.df, type(None)) is False:
             self.df = DataFrame()
             self.df = concat([self.df, obj.df],axis=0).reset_index(drop=True)
-        elif isinstance(self.df, type(None)) == False and isinstance(obj.df, type(None)) == True:
+        elif isinstance(self.df, type(None)) is False and isinstance(obj.df, type(None)) is True:
             raise ValueError("Concating to a dataset with no df!")
         self.graphs  = self.graphs + obj.graphs
 
@@ -113,7 +113,7 @@ class GraphDataset(Dataset):
         return self.graphs[idx]
 
     def get_df(self, idx):
-        if self.df != None:
+        if self.df is not None:
             return self.df.iloc[idx]
         else:
             raise ValueError("df does not exit in this dataset.")
