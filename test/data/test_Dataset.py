@@ -1,12 +1,8 @@
 import torch
-import subprocess
-
-import pandas as pd
 
 from torch_geometric.data import Data
 
 from torch_hep.data import GraphDataset
-
 
 
 def test_dataset():
@@ -21,9 +17,7 @@ def test_dataset():
     data2 = Data(x2, edge_index, face=face, test_int=2, test_str='2')
     data2.num_nodes = 5
 
-    df_data = pd.DataFrame({'a':[1,2],'b':[0,5]})
-
-    dataset = GraphDataset([data1, data2], df = df_data)
+    dataset = GraphDataset(graphs=[data1, data2])
     assert str(dataset) == 'GraphDataset(2)'
     assert len(dataset) == 2
 
@@ -43,12 +37,8 @@ def test_dataset():
     assert dataset[1].test_int == 2
     assert dataset[1].test_str == '2'
 
-    assert dataset.df['a'].tolist() == [1,2]
-    assert dataset.df['b'].tolist() == [0,5]
-
-    dataset.save_to('/tmp/torch_hep/test/data/dataset')
-    dataset_loaded = GraphDataset()
-    dataset_loaded.download_from('/tmp/torch_hep/test/data/dataset')
+    dataset.save_to('./test/dataset/test_dataset')
+    dataset_loaded = GraphDataset(root='./test/dataset/test_dataset')
     assert str(dataset_loaded) == 'GraphDataset(2)'
     assert len(dataset_loaded) == 2
 
@@ -67,8 +57,3 @@ def test_dataset():
     assert dataset_loaded[1].face.tolist() == face.tolist()
     assert dataset_loaded[1].test_int == 2
     assert dataset_loaded[1].test_str == '2'
-
-    assert dataset_loaded.df['a'].tolist() == [1,2]
-    assert dataset_loaded.df['b'].tolist() == [0,5]
-
-    subprocess.Popen(['rm','-r','/tmp/torch_hep/test/data/dataset'])
