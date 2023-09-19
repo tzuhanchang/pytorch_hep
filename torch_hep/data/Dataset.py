@@ -31,7 +31,7 @@ class GraphDataset(Dataset):
 
         if self.root is None and self.graphs is None:
             raise ValueError("User must provide either dataset directory `root` or a list of `graphs`.")
-        
+
         if self.root is not None:
             self.batch   = len(os.listdir(os.path.join(self.root, 'batch_0')))
             self.n_split = len(os.listdir(self.root))
@@ -50,7 +50,7 @@ class GraphDataset(Dataset):
         else:
             self.n_split = math.ceil(len(self.graphs) / self.batch)
 
-        if self.graphs == None:
+        if self.graphs is None:
             raise ValueError("To save, a list of `graphs` must to be provided.")
 
         if not os.path.exists(path):
