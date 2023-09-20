@@ -1,0 +1,14 @@
+# About code owners
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Code owners recieve review requests when parts of code they "own" change.
+
+*    @tzuhanchang
+
+*.py @tzuhanchang
+
+/torch_hep/data/ @tzuhanchang
+
+/torch_hep/graph/ @tzuhanchang
+
+/test/ @tzuhanchang
