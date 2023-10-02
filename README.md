@@ -15,6 +15,7 @@ PyTorch HEP is currently a personal project, contributions to this project are w
 
 
 * [Quick Start](#quick-start)
+* [Event&rarr;Graph](#event-&rarr;-graph)
 
 ## Quick Start
 
@@ -23,7 +24,7 @@ PyTorch HEP is currently a personal project, contributions to this project are w
 pip install torch-hep
 ```
 
-### Event &rarr; Graph
+## Event &rarr; Graph
 To initialise the builder:
 ```
 G = GraphBuilder()
