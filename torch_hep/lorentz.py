@@ -173,6 +173,18 @@ class MomentumTensor(LorentzTensor):
             Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
             E  = torch.sqrt((input.select(-1,0).reshape([-1,1]))**2+Px**2+Py**2+Pz**2)
             return MomentumTensor(torch.cat((E,Px,Py,Pz),dim=1))
+        
+        
+    @staticmethod
+    def from_Vector(vector_input, **kwargs):
+        
+        r"""
+        Takes a vector.Momentum4D and returns a torch.MomentumTensor
+        """
+        return MomentumTensor(torch.cat([torch.tensor(vector_input.E.reshape(-1,1)) ,
+                              torch.tensor(vector_input.px.reshape(-1,1)),
+                              torch.tensor(vector_input.py.reshape(-1,1)),
+                              torch.tensor(vector_input.pz.reshape(-1,1))],dim=1))
     
     @property
     def e(self):
