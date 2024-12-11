@@ -143,14 +143,14 @@ class MomentumTensor(LorentzTensor):
                 raise TypeError("For 1 dimension tensor, expect size 4.")
             Px = (torch.cos(input[2])*input[3])
             Py = (torch.sin(input[2])*input[3])
-            Pz = torch.div(input[3],torch.tan(2*torch.arctan(torch.exp(-input[1]))))
+            Pz = (input[3]*torch.sinh(input[1]))
             return MomentumTensor(torch.cat((input[0].unsqueeze(0),Px.unsqueeze(0),Py.unsqueeze(0),Pz.unsqueeze(0))))
         else:
             if input.size(dim=1) != 4:
                 raise TypeError("Expect size 4 in dimension 1.")
             Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
             Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-            Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+            Pz = (input.select(-1,3)*torch.sinh(input.select(-1,1))).reshape([-1,1])
             return MomentumTensor(torch.cat((input.select(-1,0).reshape([-1,1]),Px,Py,Pz),dim=1))
     
     @staticmethod
@@ -162,7 +162,7 @@ class MomentumTensor(LorentzTensor):
                 raise TypeError("For 1 dimension tensor, expect size 4.")
             Px = (torch.cos(input[2])*input[3])
             Py = (torch.sin(input[2])*input[3])
-            Pz = torch.div(input[3],torch.tan(2*torch.arctan(torch.exp(-input[1]))))
+            Pz = (input[3]*torch.sinh(input[1]))
             E  = torch.sqrt(input[0]**2+Px**2+Py**2+Pz**2)
             return MomentumTensor(torch.cat((E.unsqueeze(0),Px.unsqueeze(0),Py.unsqueeze(0),Pz.unsqueeze(0))))
         else:
@@ -170,7 +170,7 @@ class MomentumTensor(LorentzTensor):
                 raise TypeError("Expect size 4 in dimension 1.")
             Px = (torch.cos(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
             Py = (torch.sin(input.select(-1,2))*input.select(-1,3)).reshape([-1,1])
-            Pz = torch.div(input.select(-1,3),torch.tan(2*torch.arctan(torch.exp(-input.select(-1,1))))).reshape([-1,1])
+            Pz = (input.select(-1,3)*torch.sinh(input.select(-1,1))).reshape([-1,1])
             E  = torch.sqrt((input.select(-1,0).reshape([-1,1]))**2+Px**2+Py**2+Pz**2)
             return MomentumTensor(torch.cat((E,Px,Py,Pz),dim=1))
     
