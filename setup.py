@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 URL = 'https://github.com/tzuhanchang/pytorch_hep'
 
 install_requires = [
